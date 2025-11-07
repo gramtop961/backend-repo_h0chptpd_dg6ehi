@@ -1,48 +1,40 @@
-"""
-Database Schemas
+from pydantic import BaseModel, Field, HttpUrl
+from typing import Optional, List
 
-Define your MongoDB collection schemas here using Pydantic models.
-These schemas are used for data validation in your application.
+# Tournament organizing app schemas
 
-Each Pydantic model represents a collection in your database.
-Model name is converted to lowercase for the collection name:
-- User -> "user" collection
-- Product -> "product" collection
-- BlogPost -> "blogs" collection
-"""
+class Game(BaseModel):
+    name: str = Field(..., description="Game name")
+    genre: Optional[str] = Field(None, description="Genre/category")
+    rules_url: Optional[HttpUrl] = Field(None, description="Link to rules")
 
-from pydantic import BaseModel, Field
-from typing import Optional
+class Organizer(BaseModel):
+    name: str = Field(..., description="Organizer name")
+    email: str = Field(..., description="Contact email")
+    phone: Optional[str] = Field(None, description="Contact phone")
 
-# Example schemas (replace with your own):
+class Player(BaseModel):
+    name: str = Field(..., description="Player full name")
+    email: str = Field(..., description="Player contact email")
+    handle: Optional[str] = Field(None, description="In-game name/handle")
 
-class User(BaseModel):
-    """
-    Users collection schema
-    Collection name: "user" (lowercase of class name)
-    """
-    name: str = Field(..., description="Full name")
-    email: str = Field(..., description="Email address")
-    address: str = Field(..., description="Address")
-    age: Optional[int] = Field(None, ge=0, le=120, description="Age in years")
-    is_active: bool = Field(True, description="Whether user is active")
+class Tournament(BaseModel):
+    title: str = Field(..., description="Tournament title")
+    game_id: str = Field(..., description="Linked game id")
+    organizer_id: str = Field(..., description="Linked organizer id")
+    start_date: Optional[str] = Field(None, description="Start date")
+    end_date: Optional[str] = Field(None, description="End date")
+    location: Optional[str] = Field(None, description="Location or venue name")
+    max_players: Optional[int] = Field(None, ge=2, description="Maximum number of players")
 
-class Product(BaseModel):
-    """
-    Products collection schema
-    Collection name: "product" (lowercase of class name)
-    """
-    title: str = Field(..., description="Product title")
-    description: Optional[str] = Field(None, description="Product description")
-    price: float = Field(..., ge=0, description="Price in dollars")
-    category: str = Field(..., description="Product category")
-    in_stock: bool = Field(True, description="Whether product is in stock")
+class Participant(BaseModel):
+    tournament_id: str = Field(..., description="Tournament id")
+    player_id: str = Field(..., description="Player id")
+    team_name: Optional[str] = Field(None, description="Team name if applicable")
 
-# Add your own schemas here:
-# --------------------------------------------------
+class VenueImage(BaseModel):
+    tournament_id: str = Field(..., description="Tournament id")
+    image_url: HttpUrl = Field(..., description="Public URL of the venue image")
+    caption: Optional[str] = Field(None, description="Image caption")
 
-# Note: The Flames database viewer will automatically:
-# 1. Read these schemas from GET /schema endpoint
-# 2. Use them for document validation when creating/editing
-# 3. Handle all database operations (CRUD) directly
-# 4. You don't need to create any database endpoints!
+# Note: Collection names are the lowercase of class names above.
